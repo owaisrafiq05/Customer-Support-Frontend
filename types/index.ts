@@ -1,15 +1,25 @@
 export interface User {
-  id: string
+  _id: string
   email: string
+  name: string
+  role?: string
 }
 
 export interface Ticket {
-  id: string
-  subject: string
+  _id: string
+  title: string
   description: string
-  category: "Technical" | "Billing" | "General"
-  priority: "Low" | "Medium" | "High"
-  status: "Open" | "In Progress" | "Resolved"
+  category: string
+  priority: "low" | "medium" | "high" | "urgent"
+  status: "open" | "in_progress" | "pending" | "resolved" | "closed"
   createdAt: string
-  userId: string
+  createdBy: string
+  ticketNumber?: string
+  tags?: string[]
+  attachments?: any[]
+  assignedTo?: string
+  aiSentiment?: string
+  aiSuggestedPriority?: string
+  aiSuggestedCategory?: string
+  aiSummary?: string
 }

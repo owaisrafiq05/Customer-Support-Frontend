@@ -37,7 +37,7 @@ export function TicketList({ tickets, onCreateClick, onEdit, onDelete }: TicketL
     const matchesStatus = filter === "all" || ticket.status === filter
     const matchesPriority = priorityFilter === "all" || ticket.priority === priorityFilter
     const matchesSearch = searchTerm === "" || 
-      ticket.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       ticket.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       ticket.category.toLowerCase().includes(searchTerm.toLowerCase())
     
@@ -46,12 +46,12 @@ export function TicketList({ tickets, onCreateClick, onEdit, onDelete }: TicketL
 
   // Export functions
   const exportToCSV = () => {
-    const headers = ["ID", "Subject", "Description", "Category", "Priority", "Status", "Created Date"]
+    const headers = ["ID", "Title", "Description", "Category", "Priority", "Status", "Created Date"]
     const csvContent = [
       headers.join(","),
       ...filteredTickets.map(ticket => [
-        ticket.id,
-        `"${ticket.subject.replace(/"/g, '""')}"`,
+        ticket._id,
+        `"${ticket.title.replace(/"/g, '""')}"`,
         `"${ticket.description.replace(/"/g, '""')}"`,
         ticket.category,
         ticket.priority,
@@ -98,9 +98,9 @@ export function TicketList({ tickets, onCreateClick, onEdit, onDelete }: TicketL
           <p>Total Tickets: ${filteredTickets.length}</p>
           ${filteredTickets.map(ticket => `
             <div class="ticket priority-${ticket.priority.toLowerCase()}">
-              <div class="ticket-header">${ticket.subject}</div>
+              <div class="ticket-header">${ticket.title}</div>
               <div class="ticket-meta">
-                ID: ${ticket.id} | Category: ${ticket.category} | Priority: ${ticket.priority} | Status: ${ticket.status}
+                ID: ${ticket._id} | Category: ${ticket.category} | Priority: ${ticket.priority} | Status: ${ticket.status}
               </div>
               <div class="ticket-meta">Created: ${new Date(ticket.createdAt).toLocaleDateString()}</div>
               <p>${ticket.description}</p>
@@ -121,23 +121,33 @@ export function TicketList({ tickets, onCreateClick, onEdit, onDelete }: TicketL
 
   const getPriorityColor = (priority: Ticket["priority"]) => {
     switch (priority) {
-      case "High":
+      case "high":
         return "bg-red-100 text-red-800"
-      case "Medium":
+      case "medium":
         return "bg-yellow-100 text-yellow-800"
-      case "Low":
+      case "low":
         return "bg-blue-100 text-blue-800"
+      case "urgent":
+        return "bg-red-200 text-red-900"
+      default:
+        return "bg-gray-100 text-gray-800"
     }
   }
 
   const getStatusIcon = (status: Ticket["status"]) => {
     switch (status) {
-      case "Open":
+      case "open":
         return <ExclamationCircleIconSolid className="w-6 h-6 text-red-500" />
-      case "In Progress":
+      case "in_progress":
         return <ClockIcon className="w-6 h-6 text-yellow-500" />
-      case "Resolved":
+      case "resolved":
         return <CheckCircleIcon className="w-6 h-6 text-green-500" />
+      case "closed":
+        return <CheckCircleIcon className="w-6 h-6 text-gray-500" />
+      case "pending":
+        return <ClockIcon className="w-6 h-6 text-blue-500" />
+      default:
+        return <ExclamationTriangleIcon className="w-6 h-6 text-gray-500" />
     }
   }
 
@@ -297,7 +307,7 @@ export function TicketList({ tickets, onCreateClick, onEdit, onDelete }: TicketL
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredTickets.map((ticket, index) => (
             <div
-              key={ticket.id}
+              key={ticket._id}
               className="glass rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden border border-green-100 animate-in slide-in-from-bottom-4"
               style={{ animationDelay: `${index * 100}ms` }}
             >
@@ -305,7 +315,7 @@ export function TicketList({ tickets, onCreateClick, onEdit, onDelete }: TicketL
               <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 border-b border-green-100">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1">
-                    <h3 className="font-bold text-gray-900 text-xl line-clamp-2 mb-2">{ticket.subject}</h3>
+                    <h3 className="font-bold text-gray-900 text-xl line-clamp-2 mb-2">{ticket.title}</h3>
                     <p className="text-sm text-gray-600 font-medium">{ticket.category}</p>
                   </div>
                   <div className="flex-shrink-0">
@@ -332,11 +342,17 @@ export function TicketList({ tickets, onCreateClick, onEdit, onDelete }: TicketL
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-gray-500 font-medium">Status:</span>
                   <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
-                    ticket.status === "Open" ? "bg-red-100 text-red-800" :
-                    ticket.status === "In Progress" ? "bg-yellow-100 text-yellow-800" :
-                    "bg-green-100 text-green-800"
+                    ticket.status === "open" ? "bg-red-100 text-red-800" :
+                    ticket.status === "in_progress" ? "bg-yellow-100 text-yellow-800" :
+                    ticket.status === "resolved" ? "bg-green-100 text-green-800" :
+                    ticket.status === "closed" ? "bg-gray-100 text-gray-800" :
+                    "bg-blue-100 text-blue-800"
                   }`}>
-                    {ticket.status}
+                    {ticket.status === "open" ? "Open" :
+                     ticket.status === "in_progress" ? "In Progress" :
+                     ticket.status === "resolved" ? "Resolved" :
+                     ticket.status === "closed" ? "Closed" :
+                     "Pending"}
                   </span>
                 </div>
               </div>

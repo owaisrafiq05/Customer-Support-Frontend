@@ -38,9 +38,22 @@ function DashboardContent() {
         // Load tickets from API
         const result = await ticketApi.getTickets({ page: 1, limit: 50 })
         if (result.success) {
-          const ticketsData = Array.isArray(result.data.data)
-            ? result.data.data
-            : [result.data.data]
+          // ApiClient returns { success: true, data: <backend response body> }
+          // Backend ticket endpoints return { success, message, data }
+          // so the actual payload is in result.data.data (or result.data.data.tickets)
+          let ticketsData: Ticket[] = []
+
+          const backendBody: any = result.data
+          const payload = backendBody && typeof backendBody === "object" ? (backendBody.data ?? backendBody) : backendBody
+
+          if (payload && typeof payload === "object" && Array.isArray(payload.tickets)) {
+            ticketsData = payload.tickets
+          } else if (Array.isArray(payload)) {
+            ticketsData = payload as Ticket[]
+          } else if (payload) {
+            ticketsData = [payload as Ticket]
+          }
+
           setTickets(ticketsData)
         } else {
           setError("Failed to load tickets")
@@ -55,12 +68,11 @@ function DashboardContent() {
     loadUserAndTickets()
   }, [])
 
-  const handleCreateTicket = async (ticketData: Omit<Ticket, "_id" | "createdAt" | "createdBy">) => {
+  const handleCreateTicket = async (ticketData: any) => {
     try {
       const result = await ticketApi.createTicket({
         title: ticketData.title,
         description: ticketData.description,
-        priority: ticketData.priority,
         category: ticketData.category,
       })
 
@@ -68,7 +80,7 @@ function DashboardContent() {
         const newTicket = Array.isArray(result.data.data)
           ? result.data.data[0]
           : result.data.data
-        setTickets([...tickets, newTicket])
+        setTickets([...tickets, newTicket as any])
         setCurrentPage("list")
       } else {
         setError(result.error.message || "Failed to create ticket")
@@ -78,7 +90,7 @@ function DashboardContent() {
     }
   }
 
-  const handleUpdateTicket = async (ticketData: Omit<Ticket, "_id" | "createdAt" | "createdBy">) => {
+  const handleUpdateTicket = async (ticketData: any) => {
     if (!editingTicket) return
 
     try {
@@ -94,7 +106,7 @@ function DashboardContent() {
         const updated = Array.isArray(result.data.data)
           ? result.data.data[0]
           : result.data.data
-        setTickets(tickets.map((t) => (t._id === editingTicket._id ? updated : t)))
+        setTickets(tickets.map((t) => (t._id === editingTicket._id ? (updated as any) : t)))
         setEditingTicket(null)
         setCurrentPage("list")
       } else {

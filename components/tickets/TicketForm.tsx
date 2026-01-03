@@ -6,23 +6,22 @@ import { useState } from "react"
 import type { Ticket } from "@/types"
 
 interface TicketFormProps {
-  onSubmit: (ticket: Omit<Ticket, "id" | "createdAt" | "userId">) => void
+  onSubmit: (ticket: Omit<Ticket, "_id" | "createdAt" | "createdBy">) => void
   onCancel: () => void
   initialData?: Ticket
 }
 
 export function TicketForm({ onSubmit, onCancel, initialData }: TicketFormProps) {
-  const [subject, setSubject] = useState(initialData?.subject || "")
+  const [title, setTitle] = useState(initialData?.title || "")
   const [description, setDescription] = useState(initialData?.description || "")
-  const [category, setCategory] = useState<Ticket["category"]>(initialData?.category || "General")
-  const [priority, setPriority] = useState<Ticket["priority"]>(initialData?.priority || "Medium")
+  const [category, setCategory] = useState(initialData?.category || "general")
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const validate = () => {
     const newErrors: Record<string, string> = {}
 
-    if (!subject.trim()) {
-      newErrors.subject = "Subject is required"
+    if (!title.trim()) {
+      newErrors.title = "Title is required"
     }
     if (!description.trim()) {
       newErrors.description = "Description is required"
@@ -38,35 +37,34 @@ export function TicketForm({ onSubmit, onCancel, initialData }: TicketFormProps)
     if (!validate()) return
 
     onSubmit({
-      subject,
+      title,
       description,
       category,
-      priority,
-      status: initialData?.status || "Open",
+      status: initialData?.status || "open",
+      priority: initialData?.priority || "medium",
     })
 
     if (!initialData) {
-      setSubject("")
+      setTitle("")
       setDescription("")
-      setCategory("General")
-      setPriority("Medium")
+      setCategory("general")
     }
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <label className="block text-sm font-medium text-gray-900 mb-2">Subject</label>
+        <label className="block text-sm font-medium text-gray-900 mb-2">Title</label>
         <input
           type="text"
-          value={subject}
-          onChange={(e) => setSubject(e.target.value)}
-          placeholder="Brief subject of the ticket"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Brief title of the ticket"
           className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-white text-gray-900 ${
-            errors.subject ? "border-red-500" : "border-gray-300"
+            errors.title ? "border-red-500" : "border-gray-300"
           }`}
         />
-        {errors.subject && <p className="text-red-600 text-sm mt-1">{errors.subject}</p>}
+        {errors.title && <p className="text-red-600 text-sm mt-1">{errors.title}</p>}
       </div>
 
       <div>
@@ -83,32 +81,19 @@ export function TicketForm({ onSubmit, onCancel, initialData }: TicketFormProps)
         {errors.description && <p className="text-red-600 text-sm mt-1">{errors.description}</p>}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-900 mb-2">Category</label>
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value as Ticket["category"])}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-white text-gray-900"
-          >
-            <option value="Technical">Technical</option>
-            <option value="Billing">Billing</option>
-            <option value="General">General</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-900 mb-2">Priority</label>
-          <select
-            value={priority}
-            onChange={(e) => setPriority(e.target.value as Ticket["priority"])}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-white text-gray-900"
-          >
-            <option value="Low">Low</option>
-            <option value="Medium">Medium</option>
-            <option value="High">High</option>
-          </select>
-        </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-900 mb-2">Category</label>
+        <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-white text-gray-900"
+        >
+          <option value="technical">Technical</option>
+          <option value="billing">Billing</option>
+          <option value="general">General</option>
+          <option value="feature_request">Feature Request</option>
+          <option value="bug_report">Bug Report</option>
+        </select>
       </div>
 
       <div className="flex gap-3">
