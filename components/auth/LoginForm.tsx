@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { auth } from "@/lib/auth"
+import { authApi } from "@/api"
 
 export function LoginForm() {
   const router = useRouter()
@@ -18,15 +18,20 @@ export function LoginForm() {
     setError("")
     setLoading(true)
 
-    const result = auth.login(email, password)
+    try {
+      const result = await authApi.login({ email, password })
 
-    if (result.success) {
-      router.push("/dashboard")
-    } else {
-      setError(result.error || "Login failed")
+      if (result.success) {
+        authApi.storeUser(result.data.data.user, result.data.data.token)
+        router.push("/dashboard")
+      } else {
+        setError(result.error.message || "Login failed")
+      }
+    } catch (err) {
+      setError("An unexpected error occurred")
+    } finally {
+      setLoading(false)
     }
-
-    setLoading(false)
   }
 
   return (

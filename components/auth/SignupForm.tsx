@@ -4,11 +4,12 @@ import type React from "react"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { auth } from "@/lib/auth"
+import { authApi } from "@/api"
 
 export function SignupForm() {
   const router = useRouter()
   const [email, setEmail] = useState("")
+  const [name, setName] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [error, setError] = useState("")
@@ -17,6 +18,11 @@ export function SignupForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
+
+    if (!name.trim()) {
+      setError("Name is required")
+      return
+    }
 
     if (password !== confirmPassword) {
       setError("Passwords do not match")
@@ -29,15 +35,25 @@ export function SignupForm() {
     }
 
     setLoading(true)
-    const result = auth.signup(email, password)
 
-    if (result.success) {
-      router.push("/dashboard")
-    } else {
-      setError(result.error || "Signup failed")
+    try {
+      const result = await authApi.register({
+        email,
+        name,
+        password,
+      })
+
+      if (result.success) {
+        authApi.storeUser(result.data.data.user, result.data.data.token)
+        router.push("/dashboard")
+      } else {
+        setError(result.error.message || "Signup failed")
+      }
+    } catch (err) {
+      setError("An unexpected error occurred")
+    } finally {
+      setLoading(false)
     }
-
-    setLoading(false)
   }
 
   return (
@@ -48,6 +64,18 @@ export function SignupForm() {
           {error}
         </div>
       )}
+
+      <div>
+        <label className="block text-sm font-semibold text-gray-900 mb-2">Full Name</label>
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="John Doe"
+          className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition bg-white text-gray-900 placeholder-gray-400"
+          required
+        />
+      </div>
 
       <div>
         <label className="block text-sm font-semibold text-gray-900 mb-2">Email Address</label>

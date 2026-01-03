@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { auth } from "@/lib/auth"
+import { authApi } from "@/api"
 
 interface HeaderProps {
   userEmail?: string
@@ -10,9 +10,15 @@ interface HeaderProps {
 export function Header({ userEmail }: HeaderProps) {
   const router = useRouter()
 
-  const handleLogout = () => {
-    auth.logout()
-    router.push("/login")
+  const handleLogout = async () => {
+    try {
+      await authApi.logout()
+    } catch (err) {
+      console.error("Logout error:", err)
+    } finally {
+      authApi.clearUser()
+      router.push("/login")
+    }
   }
 
   return (

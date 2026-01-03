@@ -7,8 +7,7 @@ import { TicketList } from "@/components/tickets/TicketList"
 import { TicketCreate } from "@/components/tickets/TicketCreate"
 import { TicketEdit } from "@/components/tickets/TicketEdit"
 import type { Ticket } from "@/types"
-import { auth } from "@/lib/auth"
-import { ticketsStorage } from "@/lib/storage"
+import { authApi, ticketApi } from "@/api"
 
 type Page = "list" | "create" | "edit"
 
@@ -25,87 +24,97 @@ function DashboardContent() {
   const [tickets, setTickets] = useState<Ticket[]>([])
   const [editingTicket, setEditingTicket] = useState<Ticket | null>(null)
   const [userEmail, setUserEmail] = useState("")
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
 
   useEffect(() => {
-    const user = auth.getCurrentUser()
-    if (user) {
-      setUserEmail(user.email)
-      // Load hardcoded data
-      const hardcodedTickets: Ticket[] = [
-        {
-          id: "1",
-          userId: user.id,
-          subject: "Login issue",
-          description: "Cannot login to account",
-          category: "Technical",
-          status: "Open",
-          priority: "High",
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: "2",
-          userId: user.id,
-          subject: "Feature request",
-          description: "Need dark mode support",
-          category: "General",
-          status: "In Progress",
-          priority: "Medium",
-          createdAt: new Date().toISOString(),
-        },
-        {
-          id: "3",
-          userId: user.id,
-          subject: "Bug in dashboard",
-          description: "Charts not loading properly",
-          category: "Technical",
-          status: "Resolved",
-          priority: "Low",
-          createdAt: new Date().toISOString(),
-        },
-      ]
-      setTickets(hardcodedTickets)
-      ticketsStorage.setTickets(hardcodedTickets)
+    const loadUserAndTickets = async () => {
+      try {
+        const user = authApi.getStoredUser()
+        if (user) {
+          setUserEmail(user.email)
+        }
+
+        // Load tickets from API
+        const result = await ticketApi.getTickets({ page: 1, limit: 50 })
+        if (result.success) {
+          const ticketsData = Array.isArray(result.data.data)
+            ? result.data.data
+            : [result.data.data]
+          setTickets(ticketsData)
+        } else {
+          setError("Failed to load tickets")
+        }
+      } catch (err) {
+        setError("An error occurred while loading tickets")
+      } finally {
+        setLoading(false)
+      }
     }
+
+    loadUserAndTickets()
   }, [])
 
-  const handleCreateTicket = (ticketData: Omit<Ticket, "id" | "createdAt" | "userId">) => {
-    const user = auth.getCurrentUser()
-    if (!user) return
+  const handleCreateTicket = async (ticketData: Omit<Ticket, "_id" | "createdAt" | "createdBy">) => {
+    try {
+      const result = await ticketApi.createTicket({
+        title: ticketData.title,
+        description: ticketData.description,
+        priority: ticketData.priority,
+        category: ticketData.category,
+      })
 
-    const newTicket: Ticket = {
-      ...ticketData,
-      id: Math.random().toString(36).substr(2, 9),
-      createdAt: new Date().toISOString(),
-      userId: user.id,
+      if (result.success) {
+        const newTicket = Array.isArray(result.data.data)
+          ? result.data.data[0]
+          : result.data.data
+        setTickets([...tickets, newTicket])
+        setCurrentPage("list")
+      } else {
+        setError(result.error.message || "Failed to create ticket")
+      }
+    } catch (err) {
+      setError("An error occurred while creating ticket")
     }
-
-    const allTickets = ticketsStorage.getTickets()
-    const updated = [...allTickets, newTicket]
-    ticketsStorage.setTickets(updated)
-
-    setTickets([...tickets, newTicket])
-    setCurrentPage("list")
   }
 
-  const handleUpdateTicket = (ticketData: Omit<Ticket, "id" | "createdAt" | "userId">) => {
+  const handleUpdateTicket = async (ticketData: Omit<Ticket, "_id" | "createdAt" | "createdBy">) => {
     if (!editingTicket) return
 
-    const allTickets = ticketsStorage.getTickets()
-    const updated = allTickets.map((t) => (t.id === editingTicket.id ? { ...editingTicket, ...ticketData } : t))
-    ticketsStorage.setTickets(updated)
+    try {
+      const result = await ticketApi.updateTicket(editingTicket._id, {
+        title: ticketData.title,
+        description: ticketData.description,
+        status: ticketData.status,
+        priority: ticketData.priority,
+        category: ticketData.category,
+      })
 
-    setTickets(tickets.map((t) => (t.id === editingTicket.id ? { ...editingTicket, ...ticketData } : t)))
-
-    setEditingTicket(null)
-    setCurrentPage("list")
+      if (result.success) {
+        const updated = Array.isArray(result.data.data)
+          ? result.data.data[0]
+          : result.data.data
+        setTickets(tickets.map((t) => (t._id === editingTicket._id ? updated : t)))
+        setEditingTicket(null)
+        setCurrentPage("list")
+      } else {
+        setError(result.error.message || "Failed to update ticket")
+      }
+    } catch (err) {
+      setError("An error occurred while updating ticket")
+    }
   }
-
-  const handleDeleteTicket = (ticket: Ticket) => {
-    const allTickets = ticketsStorage.getTickets()
-    const updated = allTickets.filter((t) => t.id !== ticket.id)
-    ticketsStorage.setTickets(updated)
-
-    setTickets(tickets.filter((t) => t.id !== ticket.id))
+  const handleDeleteTicket = async (ticket: Ticket) => {
+    try {
+      const result = await ticketApi.deleteTicket(ticket._id)
+      if (result.success) {
+        setTickets(tickets.filter((t) => t._id !== ticket._id))
+      } else {
+        setError(result.error.message || "Failed to delete ticket")
+      }
+    } catch (err) {
+      setError("An error occurred while deleting ticket")
+    }
   }
 
   const handleEditTicket = (ticket: Ticket) => {
@@ -118,31 +127,46 @@ function DashboardContent() {
       <Header userEmail={userEmail} />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {currentPage === "list" && (
-          <TicketList
-            tickets={tickets}
-            onCreateClick={() => setCurrentPage("create")}
-            onEdit={handleEditTicket}
-            onDelete={handleDeleteTicket}
-          />
+        {error && (
+          <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            {error}
+            <button onClick={() => setError("")} className="float-right">✕</button>
+          </div>
         )}
 
-        {currentPage === "create" && (
-          <TicketCreate
-            onSubmit={handleCreateTicket}
-            onCancel={() => setCurrentPage("list")}
-          />
-        )}
+        {loading ? (
+          <div className="text-center py-12">
+            <p className="text-gray-600">Loading tickets...</p>
+          </div>
+        ) : (
+          <>
+            {currentPage === "list" && (
+              <TicketList
+                tickets={tickets}
+                onCreateClick={() => setCurrentPage("create")}
+                onEdit={handleEditTicket}
+                onDelete={handleDeleteTicket}
+              />
+            )}
 
-        {currentPage === "edit" && editingTicket && (
-          <TicketEdit
-            ticket={editingTicket}
-            onSubmit={handleUpdateTicket}
-            onCancel={() => {
-              setCurrentPage("list")
-              setEditingTicket(null)
-            }}
-          />
+            {currentPage === "create" && (
+              <TicketCreate
+                onSubmit={handleCreateTicket}
+                onCancel={() => setCurrentPage("list")}
+              />
+            )}
+
+            {currentPage === "edit" && editingTicket && (
+              <TicketEdit
+                ticket={editingTicket}
+                onSubmit={handleUpdateTicket}
+                onCancel={() => {
+                  setCurrentPage("list")
+                  setEditingTicket(null)
+                }}
+              />
+            )}
+          </>
         )}
       </main>
     </div>
