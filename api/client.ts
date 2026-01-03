@@ -50,9 +50,9 @@ export class ApiClient {
       const finalUrl = this.buildUrl(url, params);
       const token = this.getToken();
 
-      const headers: HeadersInit = {
+      const headers: Record<string, string> = {
         ...API_CONFIG.headers,
-        ...fetchOptions.headers,
+        ...(fetchOptions.headers as Record<string, string>),
       };
 
       if (token) {
@@ -74,7 +74,6 @@ export class ApiClient {
         ...fetchOptions,
         headers,
         body,
-        credentials: API_CONFIG.credentials,
       });
 
       if (!response.ok) {

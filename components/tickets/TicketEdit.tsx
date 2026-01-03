@@ -13,23 +13,23 @@ import type { Ticket } from "@/types"
 
 interface TicketEditProps {
   ticket: Ticket
-  onSubmit: (ticket: Omit<Ticket, "id" | "createdAt" | "userId">) => void
+  onSubmit: (ticket: Omit<Ticket, "_id" | "createdAt" | "createdBy">) => void
   onCancel: () => void
 }
 
 export function TicketEdit({ ticket, onSubmit, onCancel }: TicketEditProps) {
-  const [subject, setSubject] = useState(ticket.subject)
+  const [title, setTitle] = useState(ticket.title)
   const [description, setDescription] = useState(ticket.description)
-  const [category, setCategory] = useState<Ticket["category"]>(ticket.category)
-  const [priority, setPriority] = useState<Ticket["priority"]>(ticket.priority)
-  const [status, setStatus] = useState<Ticket["status"]>(ticket.status)
+  const [category, setCategory] = useState(ticket.category)
+  const [priority, setPriority] = useState(ticket.priority)
+  const [status, setStatus] = useState(ticket.status)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const validate = () => {
     const newErrors: Record<string, string> = {}
 
-    if (!subject.trim()) {
-      newErrors.subject = "Subject is required"
+    if (!title.trim()) {
+      newErrors.title = "Title is required"
     }
     if (!description.trim()) {
       newErrors.description = "Description is required"
@@ -45,7 +45,7 @@ export function TicketEdit({ ticket, onSubmit, onCancel }: TicketEditProps) {
     if (!validate()) return
 
     onSubmit({
-      subject,
+      title,
       description,
       category,
       priority,
@@ -55,23 +55,27 @@ export function TicketEdit({ ticket, onSubmit, onCancel }: TicketEditProps) {
 
   const getStatusColor = (stat: Ticket["status"]) => {
     switch (stat) {
-      case "Open":
+      case "open":
         return "from-red-500 to-red-600"
-      case "In Progress":
+      case "in_progress":
         return "from-yellow-500 to-yellow-600"
-      case "Resolved":
+      case "resolved":
         return "from-green-500 to-green-600"
+      default:
+        return "from-gray-500 to-gray-600"
     }
   }
 
   const getPriorityColor = (prio: Ticket["priority"]) => {
     switch (prio) {
-      case "High":
+      case "high":
         return "from-red-50 to-red-100 border-red-200"
-      case "Medium":
+      case "medium":
         return "from-yellow-50 to-yellow-100 border-yellow-200"
-      case "Low":
+      case "low":
         return "from-blue-50 to-blue-100 border-blue-200"
+      default:
+        return "from-gray-50 to-gray-100 border-gray-200"
     }
   }
 
@@ -112,7 +116,7 @@ export function TicketEdit({ ticket, onSubmit, onCancel }: TicketEditProps) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
           <div>
             <p className="text-gray-600 font-semibold">Ticket ID</p>
-            <p className="text-gray-900 font-mono">{ticket.id}</p>
+            <p className="text-gray-900 font-mono">{ticket._id}</p>
           </div>
           <div>
             <p className="text-gray-600 font-semibold">Created</p>
@@ -131,20 +135,20 @@ export function TicketEdit({ ticket, onSubmit, onCancel }: TicketEditProps) {
         <div className="lg:col-span-2">
           <div className="bg-white rounded-lg shadow-lg p-8 space-y-8">
             <form onSubmit={handleSubmit} className="space-y-8">
-              {/* Subject */}
+              {/* Title */}
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-3">
-                  Ticket Subject
+                  Ticket Title
                 </label>
                 <input
                   type="text"
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
                   className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition bg-white text-gray-900 ${
-                    errors.subject ? "border-red-500" : "border-gray-300"
+                    errors.title ? "border-red-500" : "border-gray-300"
                   }`}
                 />
-                {errors.subject && <p className="text-red-600 text-sm mt-2 flex items-center gap-1"><XMarkIcon className="w-4 h-4" /> {errors.subject}</p>}
+                {errors.title && <p className="text-red-600 text-sm mt-2 flex items-center gap-1"><XMarkIcon className="w-4 h-4" /> {errors.title}</p>}
               </div>
 
               {/* Description */}
@@ -171,12 +175,14 @@ export function TicketEdit({ ticket, onSubmit, onCancel }: TicketEditProps) {
                   </label>
                   <select
                     value={category}
-                    onChange={(e) => setCategory(e.target.value as Ticket["category"])}
+                    onChange={(e) => setCategory(e.target.value)}
                     className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition bg-white text-gray-900"
                   >
-                    <option value="Technical">Technical</option>
-                    <option value="Billing">Billing</option>
-                    <option value="General">General</option>
+                    <option value="technical">Technical</option>
+                    <option value="billing">Billing</option>
+                    <option value="general">General</option>
+                    <option value="feature_request">Feature Request</option>
+                    <option value="bug_report">Bug Report</option>
                   </select>
                 </div>
 
@@ -189,9 +195,10 @@ export function TicketEdit({ ticket, onSubmit, onCancel }: TicketEditProps) {
                     onChange={(e) => setPriority(e.target.value as Ticket["priority"])}
                     className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition bg-white text-gray-900"
                   >
-                    <option value="Low">Low</option>
-                    <option value="Medium">Medium</option>
-                    <option value="High">High</option>
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                    <option value="urgent">Urgent</option>
                   </select>
                 </div>
               </div>
@@ -202,7 +209,7 @@ export function TicketEdit({ ticket, onSubmit, onCancel }: TicketEditProps) {
                   Status
                 </label>
                 <div className="grid grid-cols-3 gap-3">
-                  {(["Open", "In Progress", "Resolved"] as const).map((stat) => (
+                  {(["open", "in_progress", "resolved"] as const).map((stat) => (
                     <button
                       key={stat}
                       type="button"
@@ -213,7 +220,7 @@ export function TicketEdit({ ticket, onSubmit, onCancel }: TicketEditProps) {
                           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
-                      {stat}
+                      {stat === "open" ? "Open" : stat === "in_progress" ? "In Progress" : "Resolved"}
                     </button>
                   ))}
                 </div>

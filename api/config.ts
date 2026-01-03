@@ -24,7 +24,9 @@ export const API_ENDPOINTS = {
   DELETE_DATA_ENTRY: (id: string) => `${API_ENDPOINT}/data-entries/${id}`,
 
   // Tickets
+  CREATE_TICKET: `${API_ENDPOINT}/tickets`,
   TICKETS: `${API_ENDPOINT}/tickets`,
+  GET_ALL_TICKETS: `${API_ENDPOINT}/tickets/my-tickets`,
   GET_TICKET: (id: string) => `${API_ENDPOINT}/tickets/${id}`,
   UPDATE_TICKET: (id: string) => `${API_ENDPOINT}/tickets/${id}`,
   DELETE_TICKET: (id: string) => `${API_ENDPOINT}/tickets/${id}`,
@@ -37,5 +39,4 @@ export const API_CONFIG = {
   headers: {
     "Content-Type": "application/json",
   },
-  credentials: "include" as const,
 };

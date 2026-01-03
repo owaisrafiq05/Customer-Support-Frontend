@@ -35,7 +35,7 @@ export function TicketTable({ tickets, onEdit, onDelete, onStatusChange }: Ticke
         <tbody>
           {tickets.map((ticket) => (
             <TicketRow
-              key={ticket.id}
+              key={ticket._id}
               ticket={ticket}
               onEdit={onEdit}
               onDelete={onDelete}

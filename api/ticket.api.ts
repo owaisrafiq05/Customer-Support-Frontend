@@ -18,8 +18,8 @@ export interface Ticket {
   _id: string;
   title: string;
   description: string;
-  status: "open" | "in-progress" | "resolved" | "closed";
-  priority: "low" | "medium" | "high" | "urgent";
+  status: "open" | "resolved" | "closed" | "in_progress" | "pending";
+  priority: "high" | "low" | "medium" | "urgent";
   category: string;
   createdBy: string;
   assignedTo?: string;
@@ -32,8 +32,7 @@ export interface Ticket {
 export interface CreateTicketPayload {
   title: string;
   description: string;
-  priority: "low" | "medium" | "high" | "urgent";
-  category: string;
+  category?: string;
   attachments?: File[];
 }
 
@@ -55,7 +54,15 @@ export interface AddMessagePayload {
 export interface TicketResponse {
   success: boolean;
   message: string;
-  data: Ticket | Ticket[];
+  data: Ticket | Ticket[] | {
+    tickets: Ticket[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      pages: number;
+    };
+  };
 }
 
 export interface TicketStatsResponse {
@@ -90,22 +97,34 @@ export const ticketApi = {
    * Create a new ticket with optional attachments
    */
   async createTicket(payload: CreateTicketPayload) {
-    const formData = new FormData();
-    formData.append("title", payload.title);
-    formData.append("description", payload.description);
-    formData.append("priority", payload.priority);
-    formData.append("category", payload.category);
-
+    // Use FormData only if there are attachments
     if (payload.attachments && payload.attachments.length > 0) {
+      const formData = new FormData();
+      formData.append("title", payload.title);
+      formData.append("description", payload.description);
+      if (payload.category) {
+        formData.append("category", payload.category);
+      }
+
       payload.attachments.forEach((file) => {
         formData.append("attachments", file);
       });
-    }
 
-    return ApiClient.post<TicketResponse>(
-      API_ENDPOINTS.TICKETS,
-      formData
-    );
+      return ApiClient.post<TicketResponse>(
+        API_ENDPOINTS.CREATE_TICKET,
+        formData
+      );
+    } else {
+      // Send as JSON if no attachments
+      return ApiClient.post<TicketResponse>(
+        API_ENDPOINTS.CREATE_TICKET,
+        {
+          title: payload.title,
+          description: payload.description,
+          category: payload.category,
+        }
+      );
+    }
   },
 
   /**
@@ -119,7 +138,7 @@ export const ticketApi = {
     category?: string;
   }) {
     return ApiClient.get<TicketResponse>(
-      API_ENDPOINTS.TICKETS,
+      API_ENDPOINTS.GET_ALL_TICKETS,
       { params }
     );
   },
@@ -137,24 +156,38 @@ export const ticketApi = {
    * Update ticket
    */
   async updateTicket(id: string, payload: UpdateTicketPayload) {
-    const formData = new FormData();
-    if (payload.title) formData.append("title", payload.title);
-    if (payload.description) formData.append("description", payload.description);
-    if (payload.status) formData.append("status", payload.status);
-    if (payload.priority) formData.append("priority", payload.priority);
-    if (payload.category) formData.append("category", payload.category);
-    if (payload.assignedTo) formData.append("assignedTo", payload.assignedTo);
-
+    // Use FormData only if there are attachments
     if (payload.attachments && payload.attachments.length > 0) {
+      const formData = new FormData();
+      if (payload.title) formData.append("title", payload.title);
+      if (payload.description) formData.append("description", payload.description);
+      if (payload.status) formData.append("status", payload.status);
+      if (payload.priority) formData.append("priority", payload.priority);
+      if (payload.category) formData.append("category", payload.category);
+      if (payload.assignedTo) formData.append("assignedTo", payload.assignedTo);
+
       payload.attachments.forEach((file) => {
         formData.append("attachments", file);
       });
-    }
 
-    return ApiClient.put<TicketResponse>(
-      API_ENDPOINTS.UPDATE_TICKET(id),
-      formData
-    );
+      return ApiClient.put<TicketResponse>(
+        API_ENDPOINTS.UPDATE_TICKET(id),
+        formData
+      );
+    } else {
+      // Send as JSON if no attachments
+      return ApiClient.put<TicketResponse>(
+        API_ENDPOINTS.UPDATE_TICKET(id),
+        {
+          title: payload.title,
+          description: payload.description,
+          status: payload.status,
+          priority: payload.priority,
+          category: payload.category,
+          assignedTo: payload.assignedTo,
+        }
+      );
+    }
   },
 
   /**
