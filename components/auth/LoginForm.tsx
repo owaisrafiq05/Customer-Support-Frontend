@@ -30,29 +30,34 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="w-full space-y-4">
-      {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">{error}</div>}
+    <form onSubmit={handleSubmit} className="w-full space-y-5">
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2">
+          <span>❌</span>
+          {error}
+        </div>
+      )}
 
       <div>
-        <label className="block text-sm font-medium text-gray-900 mb-2">Email</label>
+        <label className="block text-sm font-semibold text-gray-900 mb-2">Email Address</label>
         <input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@example.com"
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-white text-gray-900"
+          className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition bg-white text-gray-900 placeholder-gray-400"
           required
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-900 mb-2">Password</label>
+        <label className="block text-sm font-semibold text-gray-900 mb-2">Password</label>
         <input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="••••••••"
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-white text-gray-900"
+          className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition bg-white text-gray-900 placeholder-gray-400"
           required
         />
       </div>
@@ -60,9 +65,9 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-lg transition"
+        className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 disabled:from-gray-400 disabled:to-gray-400 text-white font-bold py-3 px-4 rounded-lg transition transform hover:scale-105 shadow-lg"
       >
-        {loading ? "Logging in..." : "Login"}
+        {loading ? "Signing in..." : "Sign In"}
       </button>
     </form>
   )
