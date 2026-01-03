@@ -2,6 +2,13 @@
 
 import type React from "react"
 import { useState } from "react"
+import { 
+  ArrowLeftIcon,
+  WrenchScrewdriverIcon,
+  CreditCardIcon,
+  QuestionMarkCircleIcon,
+  XMarkIcon
+} from "@heroicons/react/24/outline"
 import type { Ticket } from "@/types"
 
 interface TicketEditProps {
@@ -86,7 +93,8 @@ export function TicketEdit({ ticket, onSubmit, onCancel }: TicketEditProps) {
           onClick={onCancel}
           className="text-green-600 hover:text-green-700 font-semibold mb-4 flex items-center gap-2"
         >
-          ← Back to Tickets
+          <ArrowLeftIcon className="w-4 h-4" />
+          Back to Tickets
         </button>
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
           <div>
@@ -136,7 +144,7 @@ export function TicketEdit({ ticket, onSubmit, onCancel }: TicketEditProps) {
                     errors.subject ? "border-red-500" : "border-gray-300"
                   }`}
                 />
-                {errors.subject && <p className="text-red-600 text-sm mt-2">✗ {errors.subject}</p>}
+                {errors.subject && <p className="text-red-600 text-sm mt-2 flex items-center gap-1"><XMarkIcon className="w-4 h-4" /> {errors.subject}</p>}
               </div>
 
               {/* Description */}
@@ -152,7 +160,7 @@ export function TicketEdit({ ticket, onSubmit, onCancel }: TicketEditProps) {
                     errors.description ? "border-red-500" : "border-gray-300"
                   }`}
                 />
-                {errors.description && <p className="text-red-600 text-sm mt-2">✗ {errors.description}</p>}
+                {errors.description && <p className="text-red-600 text-sm mt-2 flex items-center gap-1"><XMarkIcon className="w-4 h-4" /> {errors.description}</p>}
               </div>
 
               {/* Priority and Category */}
@@ -166,9 +174,9 @@ export function TicketEdit({ ticket, onSubmit, onCancel }: TicketEditProps) {
                     onChange={(e) => setCategory(e.target.value as Ticket["category"])}
                     className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition bg-white text-gray-900"
                   >
-                    <option value="Technical">🔧 Technical</option>
-                    <option value="Billing">💳 Billing</option>
-                    <option value="General">❓ General</option>
+                    <option value="Technical">Technical</option>
+                    <option value="Billing">Billing</option>
+                    <option value="General">General</option>
                   </select>
                 </div>
 
@@ -181,9 +189,9 @@ export function TicketEdit({ ticket, onSubmit, onCancel }: TicketEditProps) {
                     onChange={(e) => setPriority(e.target.value as Ticket["priority"])}
                     className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition bg-white text-gray-900"
                   >
-                    <option value="Low">🟦 Low</option>
-                    <option value="Medium">🟨 Medium</option>
-                    <option value="High">🟥 High</option>
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
                   </select>
                 </div>
               </div>

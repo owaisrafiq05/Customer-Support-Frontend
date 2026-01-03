@@ -2,6 +2,16 @@
 
 import type React from "react"
 import { useState } from "react"
+import { 
+  ArrowLeftIcon,
+  XMarkIcon,
+  WrenchScrewdriverIcon,
+  CreditCardIcon,
+  QuestionMarkCircleIcon,
+  ExclamationCircleIcon,
+  ClockIcon,
+  CheckCircleIcon
+} from "@heroicons/react/24/outline"
 import type { Ticket } from "@/types"
 
 interface TicketCreateProps {
@@ -45,24 +55,27 @@ export function TicketCreate({ onSubmit, onCancel }: TicketCreateProps) {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500">
       {/* Header */}
-      <div>
+      <div className="relative">
         <button
           onClick={onCancel}
-          className="text-green-600 hover:text-green-700 font-semibold mb-4 flex items-center gap-2"
+          className="text-green-600 hover:text-green-700 font-semibold mb-6 flex items-center gap-2 transition-all hover:gap-3 group"
         >
-          ← Back to Tickets
+          <ArrowLeftIcon className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
+          Back to Tickets
         </button>
-        <h1 className="text-4xl font-bold text-gray-900">Create New Ticket</h1>
-        <p className="text-gray-600 mt-2">Describe your issue and we'll help you resolve it</p>
+        <div className="text-center">
+          <h1 className="text-5xl font-bold gradient-text mb-4">Create New Ticket</h1>
+          <p className="text-gray-600 text-lg font-medium">Describe your issue and we'll help you resolve it quickly</p>
+        </div>
       </div>
 
       {/* Form Container */}
-      <div className="bg-white rounded-lg shadow-lg p-8">
+      <div className="glass rounded-2xl shadow-2xl p-8 border border-green-100">
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Subject */}
-          <div>
+          <div className="space-y-3">
             <label className="block text-sm font-semibold text-gray-900 mb-3">
               Ticket Subject
             </label>
@@ -71,15 +84,19 @@ export function TicketCreate({ onSubmit, onCancel }: TicketCreateProps) {
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               placeholder="Brief subject of the ticket..."
-              className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition bg-white text-gray-900 placeholder-gray-400 ${
-                errors.subject ? "border-red-500" : "border-gray-300"
+              className={`w-full px-6 py-4 border-2 rounded-xl focus:outline-none focus:ring-4 focus:ring-green-500/20 focus:border-green-500 transition-all bg-white/80 text-gray-900 placeholder-gray-400 font-medium shadow-sm hover:shadow-md ${
+                errors.subject ? "border-red-500 focus:ring-red-500/20 focus:border-red-500" : "border-gray-200"
               }`}
             />
-            {errors.subject && <p className="text-red-600 text-sm mt-2">✗ {errors.subject}</p>}
+            {errors.subject && (
+              <p className="text-red-600 text-sm mt-2 flex items-center gap-2 font-medium">
+                <XMarkIcon className="w-4 h-4" /> {errors.subject}
+              </p>
+            )}
           </div>
 
           {/* Description */}
-          <div>
+          <div className="space-y-3">
             <label className="block text-sm font-semibold text-gray-900 mb-3">
               Detailed Description
             </label>
@@ -88,77 +105,90 @@ export function TicketCreate({ onSubmit, onCancel }: TicketCreateProps) {
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Provide detailed information about the issue..."
               rows={6}
-              className={`w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition bg-white text-gray-900 placeholder-gray-400 resize-none ${
-                errors.description ? "border-red-500" : "border-gray-300"
+              className={`w-full px-6 py-4 border-2 rounded-xl focus:outline-none focus:ring-4 focus:ring-green-500/20 focus:border-green-500 transition-all bg-white/80 text-gray-900 placeholder-gray-400 resize-none font-medium shadow-sm hover:shadow-md ${
+                errors.description ? "border-red-500 focus:ring-red-500/20 focus:border-red-500" : "border-gray-200"
               }`}
             />
-            {errors.description && <p className="text-red-600 text-sm mt-2">✗ {errors.description}</p>}
+            {errors.description && (
+              <p className="text-red-600 text-sm mt-2 flex items-center gap-2 font-medium">
+                <XMarkIcon className="w-4 h-4" /> {errors.description}
+              </p>
+            )}
           </div>
 
           {/* Category and Priority */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-3">
               <label className="block text-sm font-semibold text-gray-900 mb-3">
                 Category
               </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as Ticket["category"])}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition bg-white text-gray-900"
+                className="w-full px-6 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-green-500/20 focus:border-green-500 transition-all bg-white/80 text-gray-900 font-medium shadow-sm hover:shadow-md"
               >
-                <option value="Technical">🔧 Technical</option>
-                <option value="Billing">💳 Billing</option>
-                <option value="General">❓ General</option>
+                <option value="Technical">Technical Support</option>
+                <option value="Billing">Billing & Payments</option>
+                <option value="General">General Inquiry</option>
               </select>
             </div>
 
-            <div>
+            <div className="space-y-3">
               <label className="block text-sm font-semibold text-gray-900 mb-3">
                 Priority Level
               </label>
               <select
                 value={priority}
                 onChange={(e) => setPriority(e.target.value as Ticket["priority"])}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition bg-white text-gray-900"
+                className="w-full px-6 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-green-500/20 focus:border-green-500 transition-all bg-white/80 text-gray-900 font-medium shadow-sm hover:shadow-md"
               >
-                <option value="Low">🟦 Low</option>
-                <option value="Medium">🟨 Medium</option>
-                <option value="High">🟥 High</option>
+                <option value="Low">Low Priority</option>
+                <option value="Medium">Medium Priority</option>
+                <option value="High">High Priority</option>
               </select>
             </div>
           </div>
 
-          {/* Preview Card */}
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-200">
-            <h3 className="font-semibold text-gray-900 mb-3">Preview</h3>
-            <div className="space-y-2 text-sm">
-              <div>
-                <span className="text-gray-600">Subject:</span>
-                <span className="font-semibold text-gray-900 ml-2">{subject || "Not entered"}</span>
+          {/* Enhanced Preview Card */}
+          <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-8 border-2 border-green-100 shadow-lg">
+            <h3 className="font-bold text-gray-900 mb-6 text-lg flex items-center gap-2">
+              <CheckCircleIcon className="w-6 h-6 text-green-600" />
+              Ticket Preview
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="space-y-2">
+                <span className="text-gray-600 font-medium text-sm">Subject</span>
+                <p className="font-semibold text-gray-900 text-lg">{subject || "Not entered yet"}</p>
               </div>
-              <div>
-                <span className="text-gray-600">Category:</span>
-                <span className="font-semibold text-gray-900 ml-2">{category}</span>
+              <div className="space-y-2">
+                <span className="text-gray-600 font-medium text-sm">Category</span>
+                <p className="font-semibold text-gray-900">{category}</p>
               </div>
-              <div>
-                <span className="text-gray-600">Priority:</span>
-                <span className="font-semibold text-gray-900 ml-2">{priority}</span>
+              <div className="space-y-2">
+                <span className="text-gray-600 font-medium text-sm">Priority</span>
+                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold ${
+                  priority === "High" ? "bg-red-100 text-red-800" :
+                  priority === "Medium" ? "bg-yellow-100 text-yellow-800" :
+                  "bg-blue-100 text-blue-800"
+                }`}>
+                  {priority}
+                </span>
               </div>
             </div>
           </div>
 
-          {/* Buttons */}
-          <div className="flex gap-3 pt-6">
+          {/* Enhanced Buttons */}
+          <div className="flex gap-4 pt-8">
             <button
               type="submit"
-              className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-3 px-6 rounded-lg transition transform hover:scale-105 shadow-lg"
+              className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-4 px-8 rounded-xl transition-all transform hover:scale-[1.02] hover:shadow-xl shadow-lg active:scale-[0.98] focus:ring-4 focus:ring-green-500/30"
             >
               Create Ticket
             </button>
             <button
               type="button"
               onClick={onCancel}
-              className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-900 font-bold py-3 px-6 rounded-lg transition"
+              className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-900 font-bold py-4 px-8 rounded-xl transition-all hover:shadow-lg focus:ring-4 focus:ring-gray-300/30"
             >
               Cancel
             </button>

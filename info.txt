@@ -1,0 +1,39 @@
+Small businesses and internal IT departments often struggle to manage incoming requests via
+email alone. They need a centralized dashboard to record, prioritize, and track the status of
+support tickets to ensure no issue goes unresolved.
+1. Core Functional Requirements
+• Create Ticket: Users must be able to add a ticket with a Subject, Description, Category
+(Technical, Billing, General), and Priority (Low, Medium, High).
+• Input Validation: Prevent empty subjects and ensure a category/priority is selected before
+saving.
+• Ticket List: Display tickets in a structured view (Table or Grid). Each entry must show the
+Subject, Priority (with color coding), Status, and Date Created.
+• Status Tracking: Every ticket defaults to "Open". Users must be able to toggle status between
+"Open", "In Progress", and "Resolved".
+• Edit & Delete: Users can modify ticket details or remove a ticket (requires a confirmation
+pop-up).
+• User Authentication: Implement a secure Sign-up and Login system.
+• Session Management: Users must stay logged in after a page refresh, and unauthorized
+users should be redirected to the login page
+
+2. Summary & UI Requirements
+• Statistics Header: Display the total number of Open, In Progress, and Resolved tickets at the
+top of the dashboard.
+• Priority Indicators: Use visual cues (e.g., Red for High, Yellow for Medium, Green for Low) to
+differentiate ticket urgency.
+• Overdue Warning: If a ticket is "Open" and older than a specific timeframe (e.g., 24 hours), it
+must be visually flagged with an icon or warning color.
+
+3. Non-Functional & Technical Requirements
+• Persistence: All user accounts and ticket data must be stored in a persistent database (e.g.,
+SQLite, MongoDB, or PostgreSQL). Browser refreshes or server restarts must not result in data
+loss.
+• API Design: Use standard RESTful or GraphQL patterns for communication between the
+frontend and backend.
+• Stability: The app must handle database connection errors or empty result sets gracefully.
+• Data Persistence: All expense and budget data must be stored in a local SQLite database.
+• Performance: UI updates should reflect the state of the database immediately.
+4. Bonus Features (Optional)
+• Search/Filter: Filter tickets by priority or search by keyword.
+• Dark Mode: Support for theme switching.
+• Export: Download ticket logs as CSV or PDF.
